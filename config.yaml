@@ -1,0 +1,564 @@
+origin:
+  host: localhost
+  port: 3308
+  user: readonly_clann
+  password: "readonly_clann"
+  database: clann_prod
+
+keepUsernames:
+  - "srota2"
+  - "dberetta"
+  - "ocarrara"
+
+# excludeTables are not created at all
+excludeTables:
+  - "^temp_.*"
+  - ".*_BO$"
+  - ".*_AUD$"
+  - ".*_preprod$"
+  - ".*_temp$"
+
+# emptyTables are created but no data is added
+emptyTables:
+  - "^REVINFO$"
+  - "^externalcv$"
+  # Large tables with no path to Anagrafica
+  - "^Charges$"
+  - "^Medico$"
+  - "^Lavoratore$"
+  - "^Residenza$"
+  - "^Reperibilita$"
+  - "^Attestato$"
+  - "^Ricovero$"
+  - "^Dimissioni$"
+  - "^Annullamento$"
+  - "^MilestonePagamento$"
+  - "^TipologiaMappatura$"
+  - "^ControlloAnagrafica$"
+  - "^Forecast$"
+  - "^FinalForecast$"
+  - "^agip$"
+  - "^ProgettoOwnersConcat$"
+
+excludeFields:
+  - table: CoursePersonalCV
+    field: fileData
+  - table: CertificationPersonalCV
+    field: fileData
+  - table: Employee
+    field: foto
+
+
+
+softRelationships:
+  - fromTable: OreLavorateInSede
+    fromColumn: idAnagrafica
+    toTable: Anagrafica
+    toColumn: id
+  - fromTable: PayRoll
+    fromColumn: employeeNumber
+    toTable: Anagrafica
+    toColumn: employeeNumber
+  - fromTable: AttivitaSalesAdmin
+    fromColumn: idAnagrafica
+    toTable: Anagrafica
+    toColumn: id
+  - fromTable: AttivitaSalesAdmin
+    fromColumn: idAttivita
+    toTable: Attivita
+    toColumn: id
+  - fromTable: PayRollPresenceBook
+    fromColumn: employeeNumber
+    toTable: Anagrafica
+    toColumn: employeeNumber
+  - fromTable: PayRollPresenceBookDifferences
+    fromColumn: employeeNumber
+    toTable: Anagrafica
+    toColumn: employeeNumber
+  - fromTable: DatiMonitoraggio
+    fromColumn: employeeNumber
+    toTable: Anagrafica
+    toColumn: employeeNumber
+  - fromTable: Employee
+    fromColumn: employeeNumber
+    toTable: Anagrafica
+    toColumn: employeeNumber
+  - fromTable: Opportunita
+    fromColumn: idAnagrafica
+    toTable: Anagrafica
+    toColumn: id
+  - fromTable: InternalCV
+    fromColumn: registry_id
+    toTable: Anagrafica
+    toColumn: id
+  # CV detail tables (MyISAM, no real FKs)
+  - fromTable: TechnicalCompetenceInternalCV
+    fromColumn: internalcv_id
+    toTable: InternalCV
+    toColumn: id
+  - fromTable: SkillLanguageCV
+    fromColumn: internalcv_id
+    toTable: InternalCV
+    toColumn: id
+  - fromTable: ProfessionalExperienceCV
+    fromColumn: internalcv_id
+    toTable: InternalCV
+    toColumn: id
+  - fromTable: CoursePersonalCV
+    fromColumn: internalcv_id
+    toTable: InternalCV
+    toColumn: id
+  - fromTable: CertificationPersonalCV
+    fromColumn: internalcv_id
+    toTable: InternalCV
+    toColumn: id
+  # CV join/detail → catalog tables (MyISAM, no real FKs)
+  - fromTable: TechnicalCompetenceInternalCV
+    fromColumn: technicalCompetencecv_id
+    toTable: TechnicalCompetenceCV
+    toColumn: id
+  - fromTable: CoursePersonalCV
+    fromColumn: coursecv_id
+    toTable: CourseCV
+    toColumn: id
+  - fromTable: CertificationPersonalCV
+    fromColumn: certificationcv_id
+    toTable: CertificationCV
+    toColumn: id
+
+replaceFields:
+  # --- RAL ---
+  - table: RAL
+    field: note
+    value: "AV3YbYzw02/VHNKWLElkCejYZTmetfkC"
+  - table: RAL
+    field: ralAnnua
+    value: "6588717102279660600542749224106438296287177605.28"
+  - table: RAL
+    field: importoLordo
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: minimoTabellare
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: scatti
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: contingenza
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: terzoElemento
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: diCuiSuperminimo
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: superminimoAssorbibile
+    value: "-2407706560682288683463411759158166222260131594.08"
+  - table: RAL
+    field: superminimoNonAssorbibile
+    value: "-2407706560682288683463411759158166222260131594.08"
+  # --- Multa ---
+  - table: Multa
+    field: note
+    value: "gcNK6U8QJrCsG9ounrwarIJFbI5ZyYMg"
+  - table: Multa
+    field: importoMulta
+    value: "3766912905888506278525670906696943107113945661.60"
+  # --- ImportoVariabile ---
+  - table: ImportoVariabile
+    field: note
+    value: "i8uvQqGs+juUNeiZqQ4pmMSWy2HO8Blo"
+  - table: ImportoVariabile
+    field: importoVariabile
+    value: "-1888211752432209725444159541367180111811235020.64"
+  # --- Tantum ---
+  - table: Tantum
+    field: note
+    value: "EEUUrH9zr+v5XuY9Nt+Hg5ZFBAgH5e7e"
+  - table: Tantum
+    field: importoTantum
+    value: "-2065956221031243726870176177532512516216591482.72"
+  # --- PagamentoRolFerie ---
+  - table: PagamentoRolFerie
+    field: note
+    value: "relaUcTFIbf3LpGJaNCWGUHohjIRzXmp"
+  - table: PagamentoRolFerie
+    field: numeroPagate
+    value: "99999999.00"
+  # --- Forfait ---
+  - table: Forfait
+    field: note
+    value: "zGg2mr82hYTbnBZqD+kfKO0Uoso+78zx"
+  - table: Forfait
+    field: forfaitViaggi
+    value: "-1140452931293471643374646911891394849998121205.60"
+  # --- Tfr ---
+  - table: Tfr
+    field: note
+    value: "J6DMkO2d0Ms+EeMh9BKfELYwRtgCU6IU"
+  - table: Tfr
+    field: importoTfr
+    value: "-6008482587775703457954774596527162601717419212.64"
+  # --- CessioneQuinto ---
+  - table: CessioneQuinto
+    field: note
+    value: "ELZR9S/NVcEoyARBXuWpOPSKYTBJc/sH"
+  - table: CessioneQuinto
+    field: importoCessione
+    value: "-1949516624212598817091727988540595225158546882.40"
+  # --- PayrollData ---
+  - table: PayrollData
+    field: note
+    value: "dati di prova"
+  # --- NotePersonali ---
+  - table: NotePersonali
+    field: note
+    value: "dati di prova"
+  # --- Segnalazione ---
+  - table: Segnalazione
+    field: note
+    value: "note di prova"
+  # --- Anagrafica ---
+  - table: Anagrafica
+    field: dataNascita
+    value: "2000-01-01 00:00:00"
+  - table: Anagrafica
+    field: personalPhone
+    value: "1234567890"
+  - table: Anagrafica
+    field: personalEmail
+    value: "fittizia@example.com"
+  - table: Anagrafica
+    field: numeroPatente
+    value: "0000000"
+  - table: Anagrafica
+    field: scadenzaPatente
+    value: "9999-12-31"
+  - table: Anagrafica
+    field: titoloStudio
+    value: "3"
+  - table: Anagrafica
+    field: capDomicilio
+    value: "00000"
+  - table: Anagrafica
+    field: capResidenza
+    value: "00000"
+  - table: Anagrafica
+    field: identityDocument
+    value: "00000000"
+  - table: Anagrafica
+    field: homeAddress
+    value: "Via fittizia, 1"
+  - table: Anagrafica
+    field: identityDocumentExpiry
+    value: "9999-12-31"
+  - table: Anagrafica
+    field: identityDocumentFrom
+    value: "Comune di anonima"
+  - table: Anagrafica
+    field: identityDocumentOn
+    value: "9999-01-01"
+  - table: Anagrafica
+    field: luogoNascita
+    value: "anonima"
+  - table: Anagrafica
+    field: militare
+    value: "No"
+  - table: Anagrafica
+    field: militarePosizione
+    value: "N/A"
+  - table: Anagrafica
+    field: patente
+    value: "1"
+  - table: Anagrafica
+    field: provinciaNascita
+    value: "N/A"
+  - table: Anagrafica
+    field: townHouse
+    value: "anonima"
+  - table: Anagrafica
+    field: noteLicenziamento
+    value: "N/A"
+  - table: Anagrafica
+    field: codiceFiscale
+    value: "0000000000000000"
+  - table: Anagrafica
+    field: codiceInaz
+    value: "00000"
+  - table: Anagrafica
+    field: domicilioAddress
+    value: "Via fittizia, 2"
+  - table: Anagrafica
+    field: familiariCarico
+    value: "0"
+  - table: Anagrafica
+    field: familiariCaricoHandicap
+    value: "0"
+  - table: Anagrafica
+    field: familiariCaricoMinori
+    value: "0"
+  - table: Anagrafica
+    field: scadenzaPermessoSoggiorno
+    value: "9999-12-31"
+  - table: Anagrafica
+    field: statoCivile
+    value: "1"
+  - table: Anagrafica
+    field: townDomicilio
+    value: "Roma"
+  - table: Anagrafica
+    field: dataCambioScatti
+    value: "9999-01-01"
+  - table: Anagrafica
+    field: ritiriPatente
+    value: "0"
+  - table: Anagrafica
+    field: descrizioneStudio
+    value: "Laurea"
+  - table: Anagrafica
+    field: cityDomicilio_id
+    value: "1"
+  - table: Anagrafica
+    field: cityResidenza_id
+    value: "1"
+  # --- MailRecuperoPassword ---
+  - table: MailRecuperoPassword
+    field: email
+    value: "fittizia@example.com"
+  # --- Ricovero ---
+  - table: Ricovero
+    field: dataRicovero
+    value: "2024-07-01 00:00:00"
+  # --- agip ---
+  - table: agip
+    field: codice_carta
+    value: "****"
+  - table: agip
+    field: codice_carta_short
+    value: "****"
+  - table: agip
+    field: targa_o_nominativo
+    value: "****"
+  - table: agip
+    field: codice_autista
+    value: "****"
+  - table: agip
+    field: informazioni_addizionali
+    value: "****"
+  - table: agip
+    field: raggruppamento_carte
+    value: "****"
+  - table: agip
+    field: indirizzo_punto_vendita
+    value: "****"
+  - table: agip
+    field: cap_punto_vendita
+    value: "****"
+  - table: agip
+    field: localita_punto_vendita
+    value: "****"
+  # --- sim ---
+  - table: sim
+    field: number
+    value: "****"
+  - table: sim
+    field: pin
+    value: "****"
+  - table: sim
+    field: puk
+    value: "****"
+  - table: sim
+    field: serial_number
+    value: "****"
+  - table: sim
+    field: note
+    value: "****"
+  - table: sim
+    field: note_prenotation
+    value: "****"
+  - table: sim
+    field: note_vendita
+    value: "****"
+  # --- multicard ---
+  - table: multicard
+    field: pin
+    value: "****"
+  - table: multicard
+    field: serial_number
+    value: "****"
+  - table: multicard
+    field: note
+    value: "****"
+  - table: multicard
+    field: note_prenotation
+    value: "****"
+  - table: multicard
+    field: note_vendita
+    value: "****"
+  # --- assignment ---
+  - table: assignment
+    field: notes
+    value: "****"
+  # --- badge ---
+  - table: badge
+    field: note
+    value: "****"
+  - table: badge
+    field: note_prenotation
+    value: "****"
+  - table: badge
+    field: note_vendita
+    value: "****"
+  # --- car ---
+  - table: car
+    field: note
+    value: "****"
+  - table: car
+    field: note_prenotation
+    value: "****"
+  - table: car
+    field: note_vendita
+    value: "****"
+  - table: car
+    field: autoradio_code
+    value: "****"
+  - table: car
+    field: electronic_code
+    value: "****"
+  - table: car
+    field: mechanical_code
+    value: "****"
+  - table: car
+    field: frame_number
+    value: "****"
+  - table: car
+    field: telepass
+    value: "****"
+  # --- facility_key ---
+  - table: facility_key
+    field: note
+    value: "****"
+  - table: facility_key
+    field: note_prenotation
+    value: "****"
+  - table: facility_key
+    field: note_vendita
+    value: "****"
+  # --- flat ---
+  - table: flat
+    field: note
+    value: "****"
+  - table: flat
+    field: note_prenotation
+    value: "****"
+  - table: flat
+    field: note_vendita
+    value: "****"
+  - table: flat
+    field: telephone_number
+    value: "****"
+  # --- internet_key ---
+  - table: internet_key
+    field: imei
+    value: "****"
+  - table: internet_key
+    field: seriale_vodafone
+    value: "****"
+  - table: internet_key
+    field: note
+    value: "****"
+  - table: internet_key
+    field: note_prenotation
+    value: "****"
+  - table: internet_key
+    field: note_vendita
+    value: "****"
+  # --- license ---
+  - table: license
+    field: note
+    value: "****"
+  - table: license
+    field: note_prenotation
+    value: "****"
+  - table: license
+    field: note_vendita
+    value: "****"
+  # --- monitor ---
+  - table: monitor
+    field: note
+    value: "****"
+  - table: monitor
+    field: note_prenotation
+    value: "****"
+  - table: monitor
+    field: note_vendita
+    value: "****"
+  # --- other_resource ---
+  - table: other_resource
+    field: note
+    value: "****"
+  - table: other_resource
+    field: note_prenotation
+    value: "****"
+  - table: other_resource
+    field: note_vendita
+    value: "****"
+  # --- personal_computer ---
+  - table: personal_computer
+    field: note
+    value: "****"
+  - table: personal_computer
+    field: note_prenotation
+    value: "****"
+  - table: personal_computer
+    field: note_vendita
+    value: "****"
+  # --- phone ---
+  - table: phone
+    field: imei
+    value: "****"
+  - table: phone
+    field: note
+    value: "****"
+  - table: phone
+    field: note_prenotation
+    value: "****"
+  - table: phone
+    field: note_vendita
+    value: "****"
+  # --- printer ---
+  - table: printer
+    field: note
+    value: "****"
+  - table: printer
+    field: note_prenotation
+    value: "****"
+  - table: printer
+    field: note_vendita
+    value: "****"
+  # --- viacard ---
+  - table: viacard
+    field: note
+    value: "****"
+  - table: viacard
+    field: note_prenotation
+    value: "****"
+  - table: viacard
+    field: note_vendita
+    value: "****"
+  # --- wi_fi ---
+  - table: wi_fi
+    field: ssid
+    value: "****"
+  - table: wi_fi
+    field: note
+    value: "****"
+  - table: wi_fi
+    field: note_prenotation
+    value: "****"
+  - table: wi_fi
+    field: note_vendita
+    value: "****"
+
+    
