@@ -15,6 +15,9 @@ import (
 
 const batchSize = 100
 
+// serialPlaceholder is the magic value in config that triggers per-row serial generation.
+const serialPlaceholder = "__CDUMP_SERIAL__"
+
 // WriteDataSQL generates data.sql with INSERT statements for all tables.
 //   - Tables with a (direct or indirect) FK path to userTable are filtered:
 //     only rows reachable from the kept users are included.
@@ -85,6 +88,9 @@ func WriteDataSQL(
 	keptPKs := make(map[string]map[string]bool)
 	keptPKs[userTable] = extractPKSet(userRows, userCols, userPKs)
 
+	if err := applySerials(originDB, userTable, replaceFieldSet, userRows, userCols); err != nil {
+		return err
+	}
 	if err := writeInserts(f, userTable, userCols, userRows); err != nil {
 		return err
 	}
@@ -125,6 +131,9 @@ func WriteDataSQL(
 				keptPKs[table] = extractPKSet(rows, cols, pks)
 			}
 
+			if err := applySerials(originDB, table, replaceFieldSet, rows, cols); err != nil {
+				return err
+			}
 			if err := writeInserts(f, table, cols, rows); err != nil {
 				return err
 			}
@@ -145,6 +154,9 @@ func WriteDataSQL(
 			return err
 		}
 		log.Printf("  -> %d rows from %s (full copy)", len(rows), table)
+		if err := applySerials(originDB, table, replaceFieldSet, rows, cols); err != nil {
+			return err
+		}
 		if err := writeInserts(f, table, cols, rows); err != nil {
 			return err
 		}
@@ -158,7 +170,7 @@ func WriteDataSQL(
 // Excluded fields are selected as NULL (so the DB never reads the underlying data).
 // Replaced fields are selected as a literal value (for anonymization).
 func buildSelectList(db *sql.DB, table string, excluded map[string]bool, replaced map[string]string) (string, []string, error) {
-	rows, err := db.Query("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION", table)
+	rows, err := db.Query("SELECT COLUMN_NAME, DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION", table)
 	if err != nil {
 		return "", nil, fmt.Errorf("listing columns for %s: %w", table, err)
 	}
@@ -167,15 +179,20 @@ func buildSelectList(db *sql.DB, table string, excluded map[string]bool, replace
 	var cols []string
 	var parts []string
 	for rows.Next() {
-		var col string
-		if err := rows.Scan(&col); err != nil {
+		var col, dataType string
+		if err := rows.Scan(&col, &dataType); err != nil {
 			return "", nil, err
 		}
 		cols = append(cols, col)
 		if excluded[col] {
 			parts = append(parts, fmt.Sprintf("NULL AS `%s`", col))
 		} else if val, ok := replaced[col]; ok {
-			parts = append(parts, fmt.Sprintf("'%s' AS `%s`", escapeString(val), col))
+			if val == serialPlaceholder {
+				// Serial columns are selected as NULL; values are filled post-query by applySerials.
+				parts = append(parts, fmt.Sprintf("NULL AS `%s`", col))
+			} else {
+				parts = append(parts, fmt.Sprintf("%s AS `%s`", formatReplacementLiteral(val, dataType), col))
+			}
 		} else {
 			parts = append(parts, "`"+col+"`")
 		}
@@ -408,6 +425,76 @@ func formatValue(v interface{}) string {
 		return "0"
 	default:
 		return "'" + escapeString(fmt.Sprintf("%v", val)) + "'"
+	}
+}
+
+// applySerials replaces NULL placeholders with zero-padded serial numbers for
+// columns whose replacement value is __CDUMP_SERIAL__. The width is derived from
+// the column's CHARACTER_MAXIMUM_LENGTH in INFORMATION_SCHEMA.
+func applySerials(db *sql.DB, table string, replaceFieldSet map[string]map[string]string, rows [][]interface{}, cols []string) error {
+	replaced := replaceFieldSet[table]
+	if len(replaced) == 0 || len(rows) == 0 {
+		return nil
+	}
+
+	// Collect serial columns for this table.
+	type serialCol struct {
+		idx   int
+		width int
+	}
+	var serials []serialCol
+
+	colIdx := make(map[string]int, len(cols))
+	for i, c := range cols {
+		colIdx[c] = i
+	}
+
+	for col, val := range replaced {
+		if val != serialPlaceholder {
+			continue
+		}
+		idx, ok := colIdx[col]
+		if !ok {
+			continue
+		}
+		var maxLen int
+		err := db.QueryRow(
+			"SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS "+
+				"WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+			table, col,
+		).Scan(&maxLen)
+		if err != nil {
+			return fmt.Errorf("getting CHARACTER_MAXIMUM_LENGTH for %s.%s: %w", table, col, err)
+		}
+		serials = append(serials, serialCol{idx: idx, width: maxLen})
+	}
+
+	if len(serials) == 0 {
+		return nil
+	}
+
+	// Fill in serial values.
+	for i := range rows {
+		for _, sc := range serials {
+			rows[i][sc.idx] = fmt.Sprintf("%0*d", sc.width, i+1)
+		}
+	}
+	return nil
+}
+
+// formatReplacementLiteral returns the SQL literal for a replacement value,
+// taking the MySQL DATA_TYPE into account so that non-string types (BIT,
+// integers, floats) are emitted without quotes.
+func formatReplacementLiteral(value, dataType string) string {
+	switch strings.ToLower(dataType) {
+	case "bit":
+		return fmt.Sprintf("b'%s'", value)
+	case "tinyint", "smallint", "mediumint", "int", "integer", "bigint":
+		return value
+	case "float", "double", "decimal", "numeric", "real":
+		return value
+	default:
+		return "'" + escapeString(value) + "'"
 	}
 }
 

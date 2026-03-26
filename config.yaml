@@ -382,7 +382,7 @@ replaceFields:
     value: "****"
   - table: sim
     field: serial_number
-    value: "****"
+    value: "__CDUMP_SERIAL__"
   - table: sim
     field: note
     value: "****"
@@ -398,7 +398,7 @@ replaceFields:
     value: "****"
   - table: multicard
     field: serial_number
-    value: "****"
+    value: "__CDUMP_SERIAL__"
   - table: multicard
     field: note
     value: "****"
@@ -476,7 +476,7 @@ replaceFields:
     value: "****"
   - table: internet_key
     field: seriale_vodafone
-    value: "****"
+    value: "__CDUMP_SERIAL__"
   - table: internet_key
     field: note
     value: "****"
