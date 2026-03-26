@@ -103,6 +103,10 @@ softRelationships:
     fromColumn: registry_id
     toTable: Anagrafica
     toColumn: id
+  - fromTable: assignment
+    fromColumn: assigned_to_id
+    toTable: Anagrafica
+    toColumn: id
   # CV detail tables (MyISAM, no real FKs)
   - fromTable: TechnicalCompetenceInternalCV
     fromColumn: internalcv_id
