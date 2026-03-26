@@ -9,6 +9,20 @@ keepUsernames:
   - "srota2"
   - "dberetta"
   - "ocarrara"
+  - "lmiolano"
+  - "srossi"
+  - "gtanzi"
+  - "abeanes"
+  - "marnaldo"
+  - "pmazzucchetti"
+  - "fabios"
+  - "afiume"
+  - "dbelliazzi"
+  - "dbelotti"
+  - "gferraris"
+  - "mmsaad"
+  - "sgotti"
+  - "sorlandi"
 
 # excludeTables are not created at all
 excludeTables:
