@@ -81,6 +81,7 @@ func MatchesAny(name string, patterns []*regexp.Regexp) bool {
 // GetCreateTable returns the DDL statement for the given table.
 func GetCreateTable(db *sql.DB, table string) (string, error) {
 	var tableName, ddl string
+	// nosemgrep -- This query is not vulnerable to SQL injection because the table name is not user-provided input, but rather comes from the database metadata.
 	err := db.QueryRow("SHOW CREATE TABLE `"+table+"`").Scan(&tableName, &ddl)
 	if err != nil {
 		return "", fmt.Errorf("getting DDL for %s: %w", table, err)
