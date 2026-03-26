@@ -14,12 +14,12 @@ keepUsernames:
 excludeTables:
   - "^temp_.*"
   - ".*_BO$"
-  - ".*_AUD$"
   - ".*_preprod$"
   - ".*_temp$"
 
 # emptyTables are created but no data is added
 emptyTables:
+  - ".*_AUD$"
   - "^REVINFO$"
   - "^externalcv$"
   # Large tables with no path to Anagrafica
@@ -47,8 +47,6 @@ excludeFields:
     field: fileData
   - table: Employee
     field: foto
-
-
 
 softRelationships:
   - fromTable: OreLavorateInSede
@@ -560,5 +558,3 @@ replaceFields:
   - table: wi_fi
     field: note_vendita
     value: "****"
-
-    
